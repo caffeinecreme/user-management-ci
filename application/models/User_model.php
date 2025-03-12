@@ -111,6 +111,17 @@ class User_model extends CI_Model
         return $formatted_users;
     }
 
+    public function add_user($user_data)
+    {
+        $response = $this->make_api_call($this->api_url, 'POST', $user_data);
+
+        if ($response && isset($response['id'])) {
+            return $response;
+        }
+
+        return false;
+    }
+
     private function make_api_call($url, $method, $data = null)
     {
         return make_api_request($url, $method, $data);

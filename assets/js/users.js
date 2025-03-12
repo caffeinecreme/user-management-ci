@@ -65,3 +65,150 @@ function hideSpinner() {
 		$(this).remove();
 	});
 }
+
+function setupEventListeners() {
+	$("#saveUserBtn").on("click", function () {
+		submitAddUserForm();
+	});
+
+	$(document).on("click", ".edit-user", function () {
+		const userId = $(this).data("id");
+		loadUserForEditing(userId);
+	});
+
+	$("#updateUserBtn").on("click", function () {
+		submitUpdateUserForm();
+	});
+
+	$(document).on("click", ".delete-user", function () {
+		const userId = $(this).data("id");
+		const userName = $(this).data("name");
+		showDeleteConfirmation(userId, userName);
+	});
+
+	$("#confirmDeleteBtn").on("click", function () {
+		const userId = $("#delete_user_id").val();
+		deleteUser(userId);
+	});
+
+	$("#addUserModal, #editUserModal").on("hidden.bs.modal", function () {
+		resetFormValidation($(this).find("form"));
+	});
+}
+
+function submitAddUserForm() {
+	const form = $("#addUserForm");
+
+	if (!validateForm(form)) {
+		return;
+	}
+
+	$("#saveUserBtn").html(
+		'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...'
+	);
+	$("#saveUserBtn").prop("disabled", true);
+
+	const formData = {
+		firstname: $("#firstname").val(),
+		lastname: $("#lastname").val(),
+		email: $("#email").val(),
+		phone: $("#phone").val(),
+		username: $("#username").val(),
+		password: $("#password").val(),
+	};
+
+	$.ajax({
+		url: BASE_URL + "users/add_user",
+		type: "POST",
+		data: formData,
+		dataType: "json",
+		success: function (response) {
+			$("#saveUserBtn").html("Save User");
+			$("#saveUserBtn").prop("disabled", false);
+
+			if (response.status === "success") {
+				$("#addUserModal").modal("hide");
+				form[0].reset();
+
+				userTable.ajax.reload();
+
+				showAlert("success", response.message);
+			} else {
+				showAlert("danger", response.message);
+			}
+		},
+		error: function (xhr, status, error) {
+			$("#saveUserBtn").html("Save User");
+			$("#saveUserBtn").prop("disabled", false);
+
+			showAlert(
+				"danger",
+				"An error occurred while saving the user. Please try again."
+			);
+			console.error(xhr.responseText);
+		},
+	});
+}
+
+function validateForm(form) {
+	let isValid = true;
+
+	form.find("input[required]").each(function () {
+		const input = $(this);
+
+		if (input.val().trim() === "") {
+			markInvalid(input);
+			isValid = false;
+		} else {
+			markValid(input);
+
+			if (input.attr("type") === "email" && !validateEmail(input.val())) {
+				markInvalid(input);
+				isValid = false;
+			}
+
+			if (input.attr("id") === "password" && input.val().length < 6) {
+				markInvalid(input);
+				isValid = false;
+			}
+		}
+	});
+
+	return isValid;
+}
+
+function validateEmail(email) {
+	const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	return re.test(email);
+}
+
+function markInvalid(input) {
+	input.addClass("is-invalid").removeClass("is-valid");
+}
+
+function markValid(input) {
+	input.addClass("is-valid").removeClass("is-invalid");
+}
+
+function resetFormValidation(form) {
+	form.find("input, select, textarea").removeClass("is-invalid is-valid");
+	form[0].reset();
+}
+
+function showAlert(type, message) {
+	const alertId = "alert-" + Date.now();
+	const alertHTML = `
+        <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+	$(".alert-container").append(alertHTML);
+
+	setTimeout(function () {
+		$("#" + alertId).fadeOut("slow", function () {
+			$(this).remove();
+		});
+	}, 5000);
+}

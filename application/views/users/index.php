@@ -1,6 +1,15 @@
 <div class="card mt-5">
     <div class="card-header bg-secondary text-light">
-        <h4 class="mb-0">User List</h4>
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h4 class="mb-0">User List</h4>
+            </div>
+            <div class="col-md-6 text-end">
+                <button id="btn-add-user" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fas fa-plus"></i> Add New User
+                </button>
+            </div>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">

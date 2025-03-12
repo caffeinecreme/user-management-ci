@@ -15,6 +15,7 @@ class Users extends CI_Controller
     {
         $this->load->view('templates/header');
         $this->load->view('users/index');
+        $this->load->view('users/add_modal');
         $this->load->view('templates/footer');
     }
 
@@ -69,6 +70,57 @@ class Users extends CI_Controller
                 'status' => 'error',
                 'message' => 'User not found'
             ];
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
+    public function add_user()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+
+        $this->form_validation->set_rules('firstname', 'First Name', 'required|trim');
+        $this->form_validation->set_rules('lastname', 'Last Name', 'required|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|trim');
+        $this->form_validation->set_rules('phone', 'Phone', 'required|trim');
+        $this->form_validation->set_rules('username', 'Username', 'required|trim');
+        $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|trim');
+
+        if ($this->form_validation->run() === FALSE) {
+            $response = [
+                'status' => 'error',
+                'message' => validation_errors()
+            ];
+        } else {
+            $user_data = [
+                'email' => $this->input->post('email'),
+                'username' => $this->input->post('username'),
+                'password' => $this->input->post('password'),
+                'name' => [
+                    'firstname' => $this->input->post('firstname'),
+                    'lastname' => $this->input->post('lastname')
+                ],
+                'phone' => $this->input->post('phone')
+            ];
+
+            $result = $this->User_model->add_user($user_data);
+
+            if ($result) {
+                $response = [
+                    'status' => 'success',
+                    'message' => 'User added successfully',
+                    'user' => $result
+                ];
+            } else {
+                $response = [
+                    'status' => 'error',
+                    'message' => 'Failed to add user'
+                ];
+            }
         }
 
         $this->output
