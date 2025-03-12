@@ -295,3 +295,48 @@ function submitUpdateUserForm() {
 		},
 	});
 }
+
+function showDeleteConfirmation(userId, userName) {
+	$("#delete_user_id").val(userId);
+	$("#delete_user_name").text(userName);
+	$("#deleteUserModal").modal("show");
+}
+
+function deleteUser(userId) {
+	$("#confirmDeleteBtn").html(
+		'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...'
+	);
+	$("#confirmDeleteBtn").prop("disabled", true);
+
+	$.ajax({
+		url: BASE_URL + "users/delete_user/" + userId,
+		type: "POST",
+		dataType: "json",
+		success: function (response) {
+			$("#confirmDeleteBtn").html("Delete");
+			$("#confirmDeleteBtn").prop("disabled", false);
+
+			$("#deleteUserModal").modal("hide");
+
+			if (response.status === "success") {
+				userTable.ajax.reload();
+
+				showAlert("success", response.message);
+			} else {
+				showAlert("danger", response.message);
+			}
+		},
+		error: function (xhr, status, error) {
+			$("#confirmDeleteBtn").html("Delete");
+			$("#confirmDeleteBtn").prop("disabled", false);
+
+			$("#deleteUserModal").modal("hide");
+
+			showAlert(
+				"danger",
+				"An error occurred while deleting the user. Please try again."
+			);
+			console.error(xhr.responseText);
+		},
+	});
+}

@@ -17,6 +17,7 @@ class Users extends CI_Controller
         $this->load->view('users/index');
         $this->load->view('users/add_modal');
         $this->load->view('users/edit_modal');
+        $this->load->view('users/delete_modal');
         $this->load->view('templates/footer');
     }
 
@@ -173,6 +174,31 @@ class Users extends CI_Controller
                     'message' => 'Failed to update user'
                 ];
             }
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
+    public function delete_user($id)
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+
+        $result = $this->User_model->delete_user($id);
+
+        if ($result) {
+            $response = [
+                'status' => 'success',
+                'message' => 'User deleted successfully'
+            ];
+        } else {
+            $response = [
+                'status' => 'error',
+                'message' => 'Failed to delete user'
+            ];
         }
 
         $this->output

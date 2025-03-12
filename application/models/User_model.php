@@ -139,6 +139,17 @@ class User_model extends CI_Model
         return false;
     }
 
+    public function delete_user($id)
+    {
+        $response = $this->make_api_call($this->api_url . '/' . $id, 'DELETE');
+
+        if ($response) {
+            return true;
+        }
+
+        return false;
+    }
+
     private function make_api_call($url, $method, $data = null)
     {
         return make_api_request($url, $method, $data);
