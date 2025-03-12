@@ -55,6 +55,8 @@ $route['default_controller'] = 'users';
 // User Management Routes
 $route['users'] = 'users/index';
 $route['users/add_user'] = 'users/add_user';
+$route['users/get_user/(:num)'] = 'users/get_user/$1';
+$route['users/update_user'] = 'users/update_user';
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

@@ -212,3 +212,86 @@ function showAlert(type, message) {
 		});
 	}, 5000);
 }
+
+function loadUserForEditing(userId) {
+	showSpinner();
+
+	$.ajax({
+		url: BASE_URL + "users/get_user/" + userId,
+		type: "GET",
+		dataType: "json",
+		success: function (response) {
+			hideSpinner();
+
+			if (response.status === "success") {
+				const user = response.user;
+
+				$("#edit_user_id").val(user.id);
+				$("#edit_firstname").val(user.name.firstname);
+				$("#edit_lastname").val(user.name.lastname);
+				$("#edit_email").val(user.email);
+				$("#edit_phone").val(user.phone);
+				$("#edit_username").val(user.username);
+
+				$("#editUserModal").modal("show");
+			} else {
+				showAlert("danger", response.message);
+			}
+		},
+		error: function (xhr, status, error) {
+			hideSpinner();
+
+			showAlert(
+				"danger",
+				"An error occurred while loading user data. Please try again."
+			);
+			console.error(xhr.responseText);
+		},
+	});
+}
+
+function submitUpdateUserForm() {
+	const form = $("#editUserForm");
+
+	if (!validateForm(form)) {
+		return;
+	}
+
+	$("#updateUserBtn").html(
+		'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...'
+	);
+	$("#updateUserBtn").prop("disabled", true);
+
+	const formData = form.serialize();
+
+	$.ajax({
+		url: BASE_URL + "users/update_user",
+		type: "POST",
+		data: formData,
+		dataType: "json",
+		success: function (response) {
+			$("#updateUserBtn").html("Update User");
+			$("#updateUserBtn").prop("disabled", false);
+
+			if (response.status === "success") {
+				$("#editUserModal").modal("hide");
+
+				userTable.ajax.reload();
+
+				showAlert("success", response.message);
+			} else {
+				showAlert("danger", response.message);
+			}
+		},
+		error: function (xhr, status, error) {
+			$("#updateUserBtn").html("Update User");
+			$("#updateUserBtn").prop("disabled", false);
+
+			showAlert(
+				"danger",
+				"An error occurred while updating the user. Please try again."
+			);
+			console.error(xhr.responseText);
+		},
+	});
+}

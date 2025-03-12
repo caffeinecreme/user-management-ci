@@ -122,6 +122,23 @@ class User_model extends CI_Model
         return false;
     }
 
+    public function get_user_by_id($id)
+    {
+        return $this->make_api_call($this->api_url . '/' . $id, 'GET');
+    }
+
+    public function update_user($id, $user_data)
+    {
+        $response = $this->make_api_call($this->api_url . '/' . $id, 'PUT', $user_data);
+
+        if ($response) {
+            $response['id'] = $id;
+            return $response;
+        }
+
+        return false;
+    }
+
     private function make_api_call($url, $method, $data = null)
     {
         return make_api_request($url, $method, $data);
